@@ -12,10 +12,8 @@
 
 Input input;
 
-/*
-Used Pins
-relays:
-  22 - bench 
+/*#include <input.h>
+
   23-27 -firelights 
   31 trap
   32 wheelcover
