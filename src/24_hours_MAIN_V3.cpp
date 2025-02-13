@@ -13,28 +13,37 @@
 Input input;
 
 /*#include <input.h>
-
+ outputs
   23-27 -firelights 
-  31 trap
-  32 wheelcover
-  33 topwheelcover
+  33 wheelcover
   7 winker
   28 back car lights
-  opening cave
-  closing cave
-  torches
-  spotlight
+  42 car door
+  32 floor 
+  38 rocks
+  34 35 37 torches
+  36 spotlight
+  39 fog
+  40 finlight
+  41 the end
 
 
 serials:
   8,9    jungle
   10,11  transit
-  12, 13 monkey  
+  12, 13 backup  
+  4 5 cave
+  2 3 animals
+  14 15 badguys
+  16 17 caveinside
+  18 19 end
 
 Buttons
   29 START
-  open cave 
-  closecave
+  43 statue
+  44 cave remote
+  45 tree button
+
 */        
 
 // Buttons vars
