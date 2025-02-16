@@ -1,0 +1,30 @@
+Adult Game|e1sm
+Wheel Open|g
+Backup On/Off|k
+OpenTheCar|l
+ |
+ Wheel Close|32
+ |
+ |
+ |
+ |
+Kids Game|e2sm
+ |
+ |
+ |
+ |
+ |
+ |
+ |
+ |
+ |
+English Game|e3sm
+ |
+ |
+ |
+ |
+ |
+Final Seq |f
+Final Kids|d
+ |
+END GAME|e

@@ -94,29 +94,49 @@ bool jungleStage = true;
 bool disableBench = false;
 bool wheelCloseQuest = false;
 bool visherStops = false;
-bool startMonkeySound = true;
+bool startBackupSound = true;
 char runQuest = ' ';
 bool startTheEnding = false;
 bool endAndReset = false;
-bool caveOpens = false;
 
-void serialSender(char[]);
-void mainSerialReader();
+bool caveOpened = false;
+bool caveClosed = false;
+bool kidsGame = false;
+bool runningTheEnd = false;
+bool finmMusicStarted = false;
+bool torch1Lit = false;
+bool torch2Lit = false;
+bool torch3Lit = false;
+bool spotLit = false;
+bool fogMachineOn = false;
+bool rocksFall = false;
+bool floorShake = false;
+bool carDoorOpened = false;
+bool wheelOpened = false;
+
 void printDetail(uint8_t, int);
-void stopMonkeySound(int);
-void setMonkeySound(int);
-void stopJungleSound(int);
-void setJungleSound(int);
-void stopTransitSound(int);
-void setTransitSound(int);
-void printGameProgress(int, char[10]);
-void monitorGameProgress();
+void stopBackupSound();
+void playBackupSound();
+void stopJungleSound();
+void playJungleSound();
+void stopTransitSound();
+void playTransitSound();
+void stopCaveSound();
+void playCaveSound();
+void stopCaveInsidesSound();
+void playCaveInsidesSound();
+void stopBadGuysSound();
+void playBadGuysSound();
+void playAnimalsSound();
+void stopFinalSound();
+void playFinalSound();
 void openWheel();
 void resetFun();
-void startGame(int sound_track);
+void startGame();
 void transitFunc();
 void inputCheck() ;
 
+void statueCheck();
 void remoteCheck();
 void caveRoutine();
 void endGameRoutine();
@@ -192,6 +212,8 @@ void setup() {
   caveInsidesMp3.volume(25);
   badGuysMp3.volume(25);
   finalMp3.volume(25);
+  backupMp3.enableLoop();
+  animalsMp3.enableLoop();
   resetFun();
 }
 void loop() {
@@ -212,14 +234,14 @@ void resetFun(){
   // ---- stop Mp3s
   stopTransitSound(-1);
   stopJungleSound(-1);
-  stopMonkeySound(-1);
+  stopBackupSound(-1);
   // ---- init vars
 
 
   for (int i=0; i < 5; i++){
       fireLights[i].turnOff();
   }
-  startMonkeySound = true;
+  startBackupSound = true;
   visherStops = false;
   transitStage = true;
   initGame = true;
@@ -229,7 +251,20 @@ void resetFun(){
   disableBench = false;
   startTheEnding = false;
   endAndReset = false;
-  caveOpens = false;
+  caveOpened = false;
+  caveClosed = false;
+  kidsGame = false;
+  runningTheEnd = false;
+  finmMusicStarted = false;
+  torch1Lit = false;
+  torch2Lit = false;
+  torch3Lit = false;
+  spotLit = false;
+  fogMachineOn = false;
+  rocksFall = false;
+  floorShake = false;
+  carDoorOpened = false;
+  wheelOpened = false;
   frontCarLightsVisher.turnOff();
   carBench.turnOff();
   trapRelay.turnOn();
@@ -265,6 +300,7 @@ void resetFun(){
     case '2':
         Serial.println("Kid Version chosen");
         quest_music = 100;
+        kidsGame = true;
         break;
     case '3':
         Serial.println("English Version chosen");
@@ -282,14 +318,12 @@ void resetFun(){
   input.check();
   while (input.read() != 's') {
     input.check();
-    monitorGameProgress();
   }
   
   Serial.println("You can start the game in 5 seconds.\n");
   
   // ---- select sound type
   while (initGame == true) {
-    monitorGameProgress();
     runQuest = input.read();
     if (runQuest == 'm'){
       startGame(1);
@@ -307,7 +341,7 @@ void resetFun(){
 
 
 
-void startGame(int sound_track){
+void startGame(){
   Serial.println("Press button to start game");
   bool startGamePressed = false;
   while (startGamePressed == false) {
@@ -318,11 +352,11 @@ void startGame(int sound_track){
   }
   
   gameStartTime = millis();
-  setTransitSound(sound_track);
+  playTransitSound();
   initGame = false;
   Serial.print("---=== GAME ");
   
-  Serial.print(" STARTED!! - ");
+  Serial.println(" STARTED!! - ");
 }
 
 
@@ -331,7 +365,7 @@ void transitFunc(){
     Serial.println("shooting has been started");
 
     for (int i=0; i < 5; i++){
-      fireLights[i].turnOn();
+      if (!kidsGame) fireLights[i].turnOn();
       delay(2000);
     }
     fired = true;
@@ -340,14 +374,15 @@ void transitFunc(){
     Serial.println("Accident occurs");
     if (disableBench == false) {
       frontCarLightsVisher.turnOn();
-      setJungleSound(1);
+      playJungleSound(1);
       carBench.turnOn(); 
       backCarLights.turnOff();
     }
     accident = true;
   }
-  if ((accident == true) && (gameStartTime + benchDelay*1000 + 9000 <= millis())){
+  if ((accident == true) && (!carDoorOpened) && (gameStartTime + benchDelay*1000 + 9000 <= millis())){
     Serial.println("open the door");
+    carDoorOpened = true;
     carDoor.turnOff();
   }
   
@@ -391,44 +426,77 @@ void endGameRoutine(){
 // ------------ SOUND SECTION --------------
 
 
-void setTransitSound(int track) {
-  Serial.print("play transit sound ");
-  Serial.println(track + quest_music);
-  transitMp3.playMp3Folder(track + quest_music);
+void setTransitSound() {
+  Serial.print("play transit sound - ");
+  switch (quest_music)
+  {
+  case 0:
+    Serial.println("Adult");
+    break;
+  case 100:
+    Serial.println("Kids");
+    break;
+   case 200:
+    Serial.println("English");
+    break;
+  
+  default:
+    Serial.println("Something went wrong - OOPS. call Misha");    
+    break;
+  }
+  transitMp3.playMp3Folder(1 + quest_music);
 }
-void stopTransitSound(int track) {
+void stopTransitSound() {
   Serial.println("stop transit track");
   transitMp3.stop();
 }
 
 
-void setJungleSound(int track) {
-  Serial.print("play Jungle sound ");
-  Serial.println(track + quest_music);
-  jungleMp3.playMp3Folder(track + quest_music);
+void playJungleSound() {
+  Serial.println("play Jungle sound ");
+  jungleMp3.playMp3Folder(1);
 }
-void stopJungleSound(int track) {
+void stopJungleSound() {
   Serial.println("stop Jungle track");
   jungleMp3.stop();
 }
 
 
-void setMonkeySound(int track) {
-  Serial.print("play monkey sound ");
-  Serial.println(track + quest_music);
-  backupMp3.playMp3Folder(track + quest_music);
+void playBackup() {
+  Serial.print("play monkey sound ");\
+  backupMp3.playMp3Folder(1);
 }
-void stopMonkeySound(int track) {
+void stopBackup() {
   Serial.println("stop monkey track");
   backupMp3.stop();
 }
 
+void stopCaveSound(){
+
+}
+void playCaveSound(){
+
+}
+void stopCaveInsidesSound(){
+  
+}
+void playCaveInsidesSound(){}
+void stopBadGuysSound(){}
+void playBadGuysSound(){}
+void playAnimalsSound(){}
+void stopFinalSound(){}
+void playFinalSound(){}
 
 void inputCheck() {
   input.check();
   runQuest = input.read();
   if (runQuest == 'f') {
     startTheEnding = true;
+    kidsGame = false;
+  }
+  if (runQuest == 'd') {
+    startTheEnding = true;
+    kidsGame = true;
   }
   if (runQuest == 'e') {
     resetFun();
@@ -437,43 +505,21 @@ void inputCheck() {
     carBench.turnOn();
   }
   if (runQuest == 'l') {
-    setJungleSound(1);
-  }
-  if (runQuest == 't') {
-    trapRelay.turnOff();
+    carDoor.turnOff();
   }
   if (runQuest == 'g') {
     openWheel();
   }
-  if (runQuest == 'p') {
-    setMonkeySound(2);
-    delay(10000);
-    for (int i=0; i < 7; i++) {
-      Serial.println("car lights turn on");
-      frontCarLightsVisher.turnOn();
-      delay(2000);
-      Serial.println("car lights turn off");
-      frontCarLightsVisher.turnOff(); 
-      delay(1000);
-    }
-  }
   if (runQuest == 'k') {
-    if (startMonkeySound == true) {
-      setMonkeySound(1);  
-      startMonkeySound = false;
+    if (startBackupSound == true) {
+      playBackupSound();  
+      startBackupSound = false;
     } else {
-      stopMonkeySound(-1);
-      startMonkeySound = true;
+      stopBackupSound();
+      startBackupSound = true;
       
     }
     printDetail(backupMp3.readType(), backupMp3.read());
-  }
-  if (runQuest == 'j') {
-    setJungleSound(1);
-    printDetail(jungleMp3.readType(), jungleMp3.read());
-  }
-  if (runQuest == 'd') {
-    disableBench = true;
   }
 }
 
