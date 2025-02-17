@@ -1,9 +1,9 @@
 Adult Game|e1sm
 Wheel Open|g
-Backup On/Off|k
+Backup Sound On/Off|k
 OpenTheCar|l
  |
- Wheel Close|32
+ |
  |
  |
  |
@@ -23,7 +23,7 @@ English Game|e3sm
  |
  |
  |
- |
+Bad Guys ON/OFF|p
 Final Seq |f
 Final Kids|d
  |
