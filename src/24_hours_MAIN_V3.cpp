@@ -163,9 +163,9 @@ void treeButtonCheck();
 
 // Sounds vars
 SoftwareSerial backupSerial(12, 13);
-SoftwareSerial transitSerial(10, 11); 
-SoftwareSerial jungleSerial(8, 9);
-SoftwareSerial nearCaveSerial(4, 5);
+SoftwareSerial transitSerial(11, 46); 
+SoftwareSerial jungleSerial(8, 48);
+SoftwareSerial nearCaveSerial(5, 4);
 //SoftwareSerial caveInsidesSerial(16, 17);
 //SoftwareSerial badGuysSerial(14, 15);
 //SoftwareSerial finalSerial(18, 19);
@@ -260,6 +260,14 @@ void setup() {
   finalMp3.volume(25);
   //backupMp3.enableLoop();
   //playAnimalsSound();
+  delay(200);
+  animalsMp3.loop(1);
+  delay(200);
+  
+  jungleMp3.playMp3Folder(1);
+  delay(200);
+  transitMp3.play(1);
+  delay(20000);
   resetFun();
 }
 void loop() {
@@ -285,10 +293,15 @@ void resetFun(){
   delay(100);
   // ---- stop Mp3s
   stopTransitSound();
+  delay(50);
   stopJungleSound();
+  delay(50);
   stopBackupSound();
+  delay(50);
   stopBadGuysSound();
+  delay(50);
   stopCaveInsidesSound();
+  delay(50);
   stopCaveSound();
   
   // ---- init vars
@@ -401,7 +414,7 @@ void startGame(){
   
   gameStartTime = millis();
   playTransitSound();
-  delay(50);
+  delay(200);
   initGame = false;
   Serial.print("---=== GAME ");
   delay(100);
@@ -632,7 +645,8 @@ void playTransitSound() {
     break;
   }
   delay(200);
-  transitMp3.playMp3Folder(1 +quest_music);
+  transitMp3.playMp3Folder(1);
+  delay(200);
 }
 void stopTransitSound() {
   Serial.println("stop transit track");
