@@ -508,7 +508,7 @@ void caveRoutine(){
     closeTheCave.turnOff();
     return;
   }
-  if (caveOpened && (caveOpeningTime < millis()) && !badGuysStarted){
+  if (caveOpened && (caveOpeningTime + delayBeforeBadGuys < millis()) && !badGuysStarted){
     badGuysStarted = true;
     if (noBadGuys or kidsGame){
       Serial.println("bad guys are NOT coming");
@@ -524,6 +524,7 @@ void caveRoutine(){
     delay(100);
     caveClosed = true;
     playCaveInsidesSound();
+    closeTheCave.turnOn();
     finalFogMachine.turnOn();
     delay(3000);
     finalFogMachine.turnOff();
