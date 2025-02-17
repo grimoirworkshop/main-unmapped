@@ -60,7 +60,7 @@ Relay carBench(22, true);
 Relay fireLights[5] = {{23, false}, {24, false}, {25, false}, {26, false}, {27, false}}; 
 Relay trapRelay(31, false); //--
 Relay floorShake(32, false);
-Relay wheelLock(33, true); //--
+Relay wheelLock(33, false); //--
 Relay frontCarLightsVisher(7, false);
 Relay backCarLights(28, false);
 Relay closeTheCave(30, false);           //dont remember which pin
@@ -95,7 +95,7 @@ unsigned long gameStartTime;
 unsigned long caveOpeningTime;
 unsigned long finalSeqStartTime;
 
-long shootingDelay = 125; //60; //miliseconds until shooting shounds
+long shootingDelay = 131; //60; //miliseconds until shooting shounds
 long benchDelay = shootingDelay + 21; //miliseconds from shooting to bench down
 long visherDelay = benchDelay + 180; // seconds from accident to car battery out
 
@@ -190,7 +190,7 @@ void setup() {
   trapRelay.turnOn();
   wheelLock.turnOff();
   backCarLights.turnOn();
-  Serial.begin(11520);
+  Serial.begin(9600);
   delay(100);
   Serial1.begin(9600);
   delay(100);
@@ -528,6 +528,7 @@ void caveRoutine(){
     finalFogMachine.turnOn();
     delay(3000);
     finalFogMachine.turnOff();
+    Serial.println("fog machine off");
   }
 
 }
@@ -708,7 +709,7 @@ void playCaveInsidesSound(){
     caveInsidesMp3.playMp3Folder(1);
     delay(100);  
   }
-  else if (caveClosed && caveOpened)
+  if (caveClosed && caveOpened)
   {
     Serial.println("playing cave closing + inside sound");
     delay(100);
