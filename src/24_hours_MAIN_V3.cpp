@@ -59,20 +59,20 @@ int quest_music = 0; // 0 - 1 quest, 100 - 2 quest, 200 -3 quest
 Relay carBench(22, true); 
 Relay fireLights[5] = {{23, false}, {24, false}, {25, false}, {26, false}, {27, false}}; 
 Relay trapRelay(31, false); //--
-Relay floorShake(32, true);
+Relay floorShake(32, false);
 Relay wheelLock(33, true); //--
 Relay frontCarLightsVisher(7, false);
 Relay backCarLights(28, false);
-Relay closeTheCave(30, true);           //dont remember which pin
-Relay carDoor(42, true);            //dont remember which pin
-Relay torch1(34, true);
-Relay torch2(35, true);
-Relay torch3(37, true);
-Relay spotLight(36, true);
-Relay finLight(40, true);
-Relay theEndLight(41, true);
-Relay finalFogMachine(39, true);
-Relay rockShelf(38, true);
+Relay closeTheCave(30, false);           //dont remember which pin
+Relay carDoor(42, false);            //dont remember which pin
+Relay torch1(34, false);
+Relay torch2(35, false);
+Relay torch3(37, false);
+Relay spotLight(36, false);
+Relay finLight(40, false);
+Relay theEndLight(41, false);
+Relay finalFogMachine(39, false);
+Relay rockShelf(38, false);
 
 
 
@@ -190,7 +190,7 @@ void setup() {
   trapRelay.turnOn();
   wheelLock.turnOff();
   backCarLights.turnOn();
-  Serial.begin(9600);
+  Serial.begin(11520);
   delay(100);
   Serial1.begin(9600);
   delay(100);
@@ -211,35 +211,35 @@ void setup() {
   //badGuysSerial.begin(9600);
   //finalSerial.begin(9600);
   delay(100);
-  transitMp3.begin(transitSerial);delay(300);
+  transitMp3.begin(transitSerial);delay(100);
     Serial.println(F("Initializing transitMp3:"));
   delay(100);
 
-  jungleMp3.begin(jungleSerial);delay(300);
+  jungleMp3.begin(jungleSerial);delay(100);
   Serial.println(F("Initializing jungleMp3:"));
   delay(100);
 
-  backupMp3.begin(backupSerial);delay(300);
+  backupMp3.begin(backupSerial);delay(100);
   Serial.println(F("Initializing backupMp3:"));
   delay(100);
 
-  animalsMp3.begin(animalsSerial);delay(300);
+  animalsMp3.begin(animalsSerial);delay(100);
   Serial.println(F("Initializing animalsMp3:"));
   delay(100);
 
-  nearCaveMp3.begin(nearCaveSerial);delay(300);
+  nearCaveMp3.begin(nearCaveSerial);delay(100);
   Serial.println(F("Initializing nearCaveMp3:"));
   delay(100);
 
-  caveInsidesMp3.begin(Serial2);delay(300);
+  caveInsidesMp3.begin(Serial2);delay(100);
   Serial.println(F("Initializing caveInsideMp3:"));
   delay(100);
 
-  badGuysMp3.begin(Serial3);delay(300);
+  badGuysMp3.begin(Serial3);delay(100);
   Serial.println(F("Initializing badGuysMp3:"));
   delay(100);
 
-  finalMp3.begin(Serial1);delay(300);
+  finalMp3.begin(Serial1);delay(100);
   Serial.println(F("Initializing finalMp3:"));
   delay(100);
 
@@ -264,10 +264,7 @@ void setup() {
   animalsMp3.loop(1);
   delay(200);
   
-  jungleMp3.playMp3Folder(1);
-  delay(200);
-  transitMp3.play(1);
-  delay(20000);
+  
   resetFun();
 }
 void loop() {
@@ -292,8 +289,8 @@ void resetFun(){
   Serial.println("Initiating setup mode");
   delay(100);
   // ---- stop Mp3s
-  stopTransitSound();
-  delay(50);
+  //stopTransitSound();
+  /*delay(50);
   stopJungleSound();
   delay(50);
   stopBackupSound();
@@ -303,7 +300,8 @@ void resetFun(){
   stopCaveInsidesSound();
   delay(50);
   stopCaveSound();
-  
+  delay(100);
+  */
   // ---- init vars
 
 
@@ -645,7 +643,7 @@ void playTransitSound() {
     break;
   }
   delay(200);
-  transitMp3.playMp3Folder(1);
+  transitMp3.playMp3Folder(1+quest_music);
   delay(200);
 }
 void stopTransitSound() {
