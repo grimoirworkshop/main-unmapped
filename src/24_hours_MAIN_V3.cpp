@@ -1,7 +1,7 @@
 //#include <mp3TF.h>
 #include <Arduino.h>
-#include "DFRobotDFPlayerMini.h"
-
+//#include "DFPlayerMini_Fast.h"
+#include "DFPlayerMini_Fast.h"
 
 #include <SoftwareSerial.h>
 #include <stl.h>
@@ -65,9 +65,9 @@ Relay frontCarLightsVisher(7, false);
 Relay backCarLights(28, false);
 Relay closeTheCave(30, false);           //dont remember which pin
 Relay carDoor(42, false);            //dont remember which pin
-Relay torch1(34, false);
+Relay torch1(37, false);
 Relay torch2(35, false);
-Relay torch3(37, false);
+Relay torch3(34, false);
 Relay spotLight(36, false);
 Relay finLight(40, false);
 Relay theEndLight(41, false);
@@ -78,7 +78,7 @@ Relay rockShelf(38, false);
 
 // General Vars
 unsigned long transitDuration = 5*60*1000L; //300; // miliseconds to print transit section is over
-unsigned long delayBeforeBadGuys = 25000;
+unsigned long delayBeforeBadGuys = 35000;
 unsigned long delayTorch1 = 11400;
 unsigned long delayTorch2 = 13400;
 unsigned long delayTorch3 = 15600;
@@ -86,18 +86,18 @@ unsigned long delaySpot = 19200;
 unsigned long delayFogOff = 21000;
 unsigned long delayAllOff = 30800;
 unsigned long delayKidsEnd = 47000;
-unsigned long delayFloor = 86000;
+unsigned long delayFloor = 89000;
 unsigned long delayRocks = 105000;
-unsigned long delayTheEnd = 105000;
-unsigned long delayBigLight = 113000;
+unsigned long delayBigLight = 118000;
 
 unsigned long gameStartTime;
 unsigned long caveOpeningTime;
 unsigned long finalSeqStartTime;
+unsigned long currentTime;
 
-long shootingDelay = 131; //60; //miliseconds until shooting shounds
-long benchDelay = shootingDelay + 21; //miliseconds from shooting to bench down
-long visherDelay = benchDelay + 180; // seconds from accident to car battery out
+long shootingDelay = 132; //60; //miliseconds until shooting shounds
+long benchDelay = shootingDelay + 17; //miliseconds from shooting to bench down
+long visherDelay = benchDelay + 100; // seconds from accident to car battery out
 
 
 
@@ -124,7 +124,7 @@ bool torch1Lit = false;
 bool torch2Lit = false;
 bool torch3Lit = false;
 bool spotLit = false;
-bool fogMachineOn = false;
+bool fogMachineDone = false;
 bool rocksFall = false;
 bool floorShaking = false;
 bool carDoorOpened = false;
@@ -171,14 +171,14 @@ SoftwareSerial nearCaveSerial(5, 4);
 //SoftwareSerial finalSerial(18, 19);
 SoftwareSerial animalsSerial(2, 3);
 
-DFRobotDFPlayerMini transitMp3;
-DFRobotDFPlayerMini jungleMp3;
-DFRobotDFPlayerMini backupMp3;
-DFRobotDFPlayerMini nearCaveMp3;
-DFRobotDFPlayerMini caveInsidesMp3;
-DFRobotDFPlayerMini badGuysMp3;
-DFRobotDFPlayerMini finalMp3;
-DFRobotDFPlayerMini animalsMp3;
+DFPlayerMini_Fast transitMp3;
+DFPlayerMini_Fast jungleMp3;
+DFPlayerMini_Fast backupMp3;
+DFPlayerMini_Fast nearCaveMp3;
+DFPlayerMini_Fast caveInsidesMp3;
+DFPlayerMini_Fast badGuysMp3;
+DFPlayerMini_Fast finalMp3;
+DFPlayerMini_Fast animalsMp3;
 void printDetail(uint8_t type, int value);
 
 
@@ -189,6 +189,21 @@ void setup() {
   carBench.turnOff();
   trapRelay.turnOn();
   wheelLock.turnOff();
+  carBench.turnOff();
+  trapRelay.turnOn();
+  wheelLock.turnOn();
+  backCarLights.turnOn();
+  carDoor.turnOn();
+  closeTheCave.turnOn();
+  rockShelf.turnOff();
+  floorShake.turnOff();
+  torch1.turnOff();
+  torch2.turnOff();
+  torch3.turnOff();
+  finalFogMachine.turnOff();
+  spotLight.turnOff();
+  theEndLight.turnOff();
+  finLight.turnOff();
   backCarLights.turnOn();
   Serial.begin(9600);
   delay(100);
@@ -249,7 +264,7 @@ void setup() {
   delay(100);
   backupMp3.volume(25);
   delay(100);
-  animalsMp3.volume(10);
+  animalsMp3.volume(20);
   delay(100);
   nearCaveMp3.volume(25);
   delay(100);
@@ -257,7 +272,7 @@ void setup() {
   delay(100);
   badGuysMp3.volume(25);
   delay(100);
-  finalMp3.volume(25);
+  finalMp3.volume(20);
   //backupMp3.enableLoop();
   //playAnimalsSound();
   delay(200);
@@ -268,6 +283,8 @@ void setup() {
   resetFun();
 }
 void loop() {
+  currentTime = millis();
+  delay(50);
   treeButton.check();
   CaveRemote.check();
   statue.check();
@@ -288,21 +305,7 @@ void loop() {
 void resetFun(){
   Serial.println("Initiating setup mode");
   delay(100);
-  // ---- stop Mp3s
-  //stopTransitSound();
-  /*delay(50);
-  stopJungleSound();
-  delay(50);
-  stopBackupSound();
-  delay(50);
-  stopBadGuysSound();
-  delay(50);
-  stopCaveInsidesSound();
-  delay(50);
-  stopCaveSound();
-  delay(100);
-  */
-  // ---- init vars
+ 
 
 
   for (int i=0; i < 5; i++){
@@ -345,7 +348,22 @@ void resetFun(){
   finalFogMachine.turnOff();
   spotLight.turnOff();
   theEndLight.turnOff();
-  finLight.turnOn();
+  finLight.turnOff();
+   // ---- stop Mp3s
+  stopTransitSound();
+  delay(50);
+  stopJungleSound();
+  delay(50);
+  stopBackupSound();
+  delay(50);
+  stopBadGuysSound();
+  delay(50);
+  stopCaveInsidesSound();
+  delay(50);
+  stopCaveSound();
+  delay(200);
+  
+  // ---- init vars
   
 
   //Selecting an audio track, 1 - 00XX 2 - 01XX.
@@ -413,6 +431,7 @@ void startGame(){
   gameStartTime = millis();
   playTransitSound();
   delay(200);
+  finLight.turnOn();
   initGame = false;
   Serial.print("---=== GAME ");
   delay(100);
@@ -424,7 +443,7 @@ void startGame(){
 
 
 void transitFunc(){
-  if ((fired == false) && (gameStartTime + shootingDelay*1000 <= millis())){
+  if ((fired == false) && (gameStartTime + shootingDelay*1000 <= currentTime)){
     Serial.println("shooting has been started");
 delay(100);
 
@@ -434,7 +453,7 @@ delay(100);
     }
     fired = true;
   }
-  if ((accident == false) && (gameStartTime + benchDelay*1000 <= millis())) {
+  if ((accident == false) && ((gameStartTime + benchDelay*1000 )<= currentTime)) {
     Serial.println("Accident occurs");
     delay(100);
     if (disableBench == false) {
@@ -445,7 +464,7 @@ delay(100);
     }
     accident = true;
   }
-  if ((accident == true) && (!carDoorOpened) && (gameStartTime + benchDelay*1000 + 9000 <= millis())){
+  if ((accident == true) && (!carDoorOpened) && ((gameStartTime + benchDelay*1000 + 9000 )<= currentTime)){
     Serial.println("open the door");
     delay(100);
     carDoorOpened = true;
@@ -453,7 +472,7 @@ delay(100);
   }
   
 
-  if ((visherStops == false) && (gameStartTime + visherDelay*1000 <= millis())) {
+  if ((visherStops == false) && ((gameStartTime + visherDelay*1000) <= currentTime)){
     visherStops = true;
 //    jungleMp3.volume(20);
     Serial.println("Start doing the wishers");
@@ -484,6 +503,7 @@ void openWheel(){
 void statueCheck(){
   if (!wheelOpened && statue.isHeld()){
     Serial.println("Statue in place, opening the wheel");
+    wheelOpened = true;
     delay(100);
     openWheel();
   }
@@ -495,6 +515,7 @@ void treeButtonCheck(){
     delay(100);
     treeButtonPressed = true;
     playCaveSound();
+    stopJungleSound();
   }
 }
 void caveRoutine(){
@@ -504,11 +525,11 @@ void caveRoutine(){
     delay(100);
     caveOpened = true;
     playCaveInsidesSound();
-    caveOpeningTime = millis();
+    caveOpeningTime = currentTime;
     closeTheCave.turnOff();
     return;
   }
-  if (caveOpened && (caveOpeningTime + delayBeforeBadGuys < millis()) && !badGuysStarted){
+  if (caveOpened && (caveOpeningTime + delayBeforeBadGuys < currentTime) && !badGuysStarted){
     badGuysStarted = true;
     if (noBadGuys or kidsGame){
       Serial.println("bad guys are NOT coming");
@@ -539,7 +560,7 @@ if (!runningTheEnd){
   delay(100);
   playFinalSound();
   runningTheEnd = true;
-  finalSeqStartTime = millis();
+  finalSeqStartTime = currentTime+4000;
   Serial.print("Game duration was  ");
   delay(100);
   Serial.print((finalSeqStartTime-gameStartTime)/60000);
@@ -549,34 +570,35 @@ delay(100);
 
   return;
 }
-if (runningTheEnd && !torch1.isOn() && (millis()>finalSeqStartTime+delayTorch1) ){
+if (runningTheEnd && !torch1.isOn() && (currentTime>(finalSeqStartTime+delayTorch1)) &&(currentTime<delayAllOff+finalSeqStartTime)){
   torch1.turnOn();
   Serial.println("torch 1 lit");
 delay(100);}
 
-if (runningTheEnd && !torch2.isOn() && (millis()>finalSeqStartTime+delayTorch2) ){
+if (runningTheEnd && !torch2.isOn() && (currentTime>(finalSeqStartTime+delayTorch2) &&(currentTime<delayAllOff+finalSeqStartTime))){
   torch2.turnOn();
   Serial.println("torch 1 lit");
 delay(100);}
 
-if (runningTheEnd && !torch3.isOn() && (millis()>finalSeqStartTime+delayTorch3) ){
+if (runningTheEnd && !torch3.isOn() && (currentTime>(finalSeqStartTime+delayTorch3) &&(currentTime<delayAllOff+finalSeqStartTime))){
   torch3.turnOn();
   Serial.println("torch 3 lit");
 delay(100);}
 
-if (runningTheEnd && !spotLight.isOn() && (millis()>finalSeqStartTime+delaySpot) ){
+if (!fogMachineDone && !spotLight.isOn() && (currentTime>(finalSeqStartTime+delaySpot)&&(currentTime<delayAllOff+finalSeqStartTime) )){
   spotLight.turnOn();
   finalFogMachine.turnOn();
+  fogMachineDone = true;
   Serial.println("spot lit, fog on");
 delay(100);}
 
-if (runningTheEnd && finalFogMachine.isOn() && (millis()>finalSeqStartTime+delayFogOff) ){
-  torch1.turnOn();
+if (runningTheEnd && finalFogMachine.isOn() && (currentTime>(finalSeqStartTime+delayFogOff))&&(currentTime<delayAllOff+finalSeqStartTime) ){
+  finalFogMachine.turnOff();
   Serial.println("fog machine off");
 delay(100);}
 
 if (kidsGame){
-  if (runningTheEnd && torch1.isOn() && (millis()>finalSeqStartTime+delayKidsEnd) ){
+  if (runningTheEnd && torch1.isOn() && (currentTime>(finalSeqStartTime+delayKidsEnd)) ){
     torch1.turnOff();
     torch2.turnOff();
     torch3.turnOff();
@@ -587,7 +609,7 @@ if (kidsGame){
 
 }
 else{
-  if (runningTheEnd && spotLight.isOn() && (millis()>finalSeqStartTime+delayAllOff) ){
+  if (runningTheEnd && spotLight.isOn() && (currentTime>(finalSeqStartTime+delayAllOff)) &&(currentTime<(finalSeqStartTime+delayFloor))){
     torch1.turnOff();
     torch2.turnOff();
     torch3.turnOff();
@@ -595,25 +617,26 @@ else{
     Serial.println("turn all off");
   delay(100);}
 
-  if (runningTheEnd && !floorShake.isOn() && (millis()>finalSeqStartTime+delayFloor) ){
+  if (runningTheEnd && !floorShake.isOn() &&(!rockShelf.isOn())&& (currentTime>(finalSeqStartTime+delayFloor))&&(currentTime<(finalSeqStartTime+delayRocks)) ){
     floorShake.turnOn();
     theEndLight.turnOn();
     Serial.println("floor + the end sign");
   delay(100);}
 
-  if (runningTheEnd && !rockShelf.isOn() && (millis()>finalSeqStartTime+delayRocks) ){
+  if (runningTheEnd && !rockShelf.isOn() && (currentTime>(finalSeqStartTime+delayRocks) )&& (currentTime<(finalSeqStartTime+delayBigLight) )){
     rockShelf.turnOn();
     floorShake.turnOff();
     theEndLight.turnOff();
     Serial.println("rocks fall, shaking ends");
-  delay(100);}
+    delay(100);
+  }
 
-  if (runningTheEnd && rockShelf.isOn() && (millis()>finalSeqStartTime+delayTheEnd) ){
-    finLight.turnOn();
+  if (runningTheEnd && rockShelf.isOn() && (currentTime>(finalSeqStartTime+delayBigLight) &&!spotLight.isOn())){
+    finLight.turnOff();
     spotLight.turnOn();
-    rockShelf.turnOff();
     Serial.println("that's all, folks");
-  delay(100);}
+    delay(100);
+  }
 
 }
 }
@@ -645,13 +668,13 @@ void playTransitSound() {
     break;
   }
   delay(200);
-  transitMp3.playMp3Folder(1+quest_music);
+  transitMp3.playFromMP3Folder(1+quest_music);
   delay(200);
 }
 void stopTransitSound() {
   Serial.println("stop transit track");
   delay(100);
-  transitMp3.stop();
+  transitMp3.pause();
   delay(100);
 }
 
@@ -659,13 +682,13 @@ void stopTransitSound() {
 void playJungleSound() {
   Serial.println("play Jungle sound ");
   delay(100);
-  jungleMp3.playMp3Folder(1);
+  jungleMp3.playFromMP3Folder(1);
   delay(100);
 }
 void stopJungleSound() {
   Serial.println("stop Jungle track");
   delay(100);
-  jungleMp3.stop();
+  jungleMp3.pause();
   delay(100);
 }
 
@@ -679,41 +702,43 @@ void playBackupSound() {
 void stopBackupSound() {
   Serial.println("stop animal backup");
   delay(100);
-  backupMp3.stop();
+  backupMp3.pause();
   delay(100);
 }
 
 void stopCaveSound(){
   Serial.println("stop nearCave track");
   delay(100);
-  nearCaveMp3.stop();
+  nearCaveMp3.pause();
   delay(100);
 }
 void playCaveSound(){
   Serial.println("play nearCave sound ");
   delay(100);
-  nearCaveMp3.playMp3Folder(1);
+  nearCaveMp3.playFromMP3Folder(1);
   delay(100);
 }
 
 void stopCaveInsidesSound(){
   Serial.println("stop Jungle track");
   delay(100);
-  caveInsidesMp3.stop();
+  caveInsidesMp3.pause();
   delay(100);
 }
 void playCaveInsidesSound(){
   if (caveOpened && !caveClosed){
     Serial.println("playing cave opening sound");
     delay(100);
-    caveInsidesMp3.playMp3Folder(1);
+    caveInsidesMp3.playFromMP3Folder(1);
     delay(100);  
   }
   if (caveClosed && caveOpened)
   {
     Serial.println("playing cave closing + inside sound");
     delay(100);
-    caveInsidesMp3.playMp3Folder(2);
+    caveInsidesMp3.pause();
+    delay(100);
+    caveInsidesMp3.playFromMP3Folder(2);
     delay(100);
   }
 }
@@ -721,41 +746,41 @@ void playCaveInsidesSound(){
 void stopBadGuysSound(){
   Serial.println("stop bad guys track");
   delay(100);
-  badGuysMp3.stop();
+  badGuysMp3.pause();
   delay(100);
 }
 void playBadGuysSound(){
   Serial.println("play badguys sound ");
   delay(100);
-  badGuysMp3.playMp3Folder(1);
+  badGuysMp3.playFromMP3Folder(1);
   delay(100);
 }
 
 void playAnimalsSound(){
   Serial.println("play animal sounds");
   delay(100);
-  animalsMp3.enableLoop();
-  animalsMp3.playMp3Folder(1);
+  //animalsMp3.enableLoop();
+  animalsMp3.playFromMP3Folder(1);
   delay(100);
 }
 
 void stopFinalSound(){
   Serial.println("stop final track");
   delay(100);
-  finalMp3.stop();
+  finalMp3.pause();
   delay(100);
 }
 void playFinalSound(){
   Serial.print("play final track");
   delay(100);
   if (kidsGame){
-    finalMp3.playMp3Folder(101);
+    finalMp3.playFromMP3Folder(101);
     delay(100);
     Serial.println(": Kids");
   delay(100);}
 
   else{
-    finalMp3.playMp3Folder(1+quest_music);
+    finalMp3.playFromMP3Folder(1+quest_music);
     delay(100);
     Serial.println(": Adults");
   delay(100);}
@@ -807,12 +832,13 @@ void inputCheck() {
       startBackupSound = true;
       
     }
-    printDetail(backupMp3.readType(), backupMp3.read());
+    //printDetail(backupMp3.readType(), backupMp3.read());
   }
 }
 
 
 // ----------- SOUND PRINT --------------
+/*
 void printDetail(uint8_t type, int value){
   switch (type) {
     case TimeOut:
@@ -884,7 +910,7 @@ void printDetail(uint8_t type, int value){
   }
 }
 
-
+*/
 // ---------- ARDUINO COMMUNICATION SECTION ------------
 
 /*
